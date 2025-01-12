@@ -1,12 +1,16 @@
-FROM odoo:18.0
+FROM ruby:slim
 
-USER root
+LABEL Name=dockerwc Version=0.0.1
 
-COPY ./addons /mnt/extra-addons
-COPY ./requirements.txt /opt/odoo/requirements.txt
-RUN pip3 install --break-system-packages -r /opt/odoo/requirements.txt
+EXPOSE 3000
 
-# RUN pip3 install -r /opt/odoo/requirements.txt
+# throw errors if Gemfile has been modified since Gemfile.lock
+RUN bundle config --global frozen 1
 
-USER odoo
-CMD ["odoo"]
+WORKDIR /app
+COPY . /app
+
+COPY Gemfile Gemfile.lock ./
+RUN bundle install
+
+CMD ["ruby", "dockerwc.rb"]
